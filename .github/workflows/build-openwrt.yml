@@ -34,8 +34,9 @@ env:
   SSH_ACTIONS: true
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
-  UPLOAD_COWTRANSFER: true
-  UPLOAD_WETRANSFER: false
+  UPLOAD_COWTRANSFER: false
+  UPLOAD_WETRANSFER: true
+  UPLOAD_WSSTRANSFER: true
   TZ: Asia/Shanghai
 
 jobs:
@@ -153,3 +154,10 @@ jobs:
         curl -fsSL git.io/file-transfer | sh
         ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
         echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
+        
+    - name: Upload firmware to WenShuShu
+      if: steps.organize.outputs.status == 'success' && env.UPLOAD_WSSTRANSFER == 'true' && !cancelled()
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer wss -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wsstransfer.log
+        echo "::warning file=wsstransfer.com::$(cat wsstransfer.log | grep https)"
